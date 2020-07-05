@@ -146,9 +146,9 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
+#target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
-# )
+#)
 
 #############
 ## Install ##
@@ -197,3 +197,29 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_executable(pub src/pub.cpp)
+target_link_libraries(pub ${catkin_LIBRARIES})
+add_dependencies(pub MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
+
+add_executable(sub src/sub.cpp)
+target_link_libraries(sub ${catkin_LIBRARIES})
+add_dependencies(sub MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
+
+#add_executable(RPMSerialInterface src/RPMSerialInterface.cpp)
+#target_link_libraries(RPMSerialInterface ${catkin_LIBRARIES})
+#add_dependencies(RPMSerialInterface MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
+
+#add_executable(Utils src/Utils.cpp)
+#target_link_libraries(Utils ${catkin_LIBRARIES})
+#add_dependencies(Utils MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
+
+add_library(RPMSerialInterface src/RPMSerialInterface.cpp)
+add_library(Utils src/Utils.cpp)
+add_library(RPMSerialInterfacePOSIX src/RPMSerialInterfacePOSIX.cpp)
+add_executable(demo src/demo.cpp)
+target_link_libraries(demo ${catkin_LIBRARIES})
+target_link_libraries(demo RPMSerialInterface)
+target_link_libraries(demo Utils)
+target_link_libraries(demo RPMSerialInterfacePOSIX)
+add_dependencies(demo MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
