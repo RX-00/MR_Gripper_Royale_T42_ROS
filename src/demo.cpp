@@ -10,8 +10,8 @@
 #include <string>
 #include <unistd.h>
 
-#include "/home/gripper/catkin_ws/src/MR_Gripper_Royale_T42_ROS/include/RPMSerialInterface.h" // servos
-#include "/home/gripper/catkin_ws/src/MR_Gripper_Royale_T42_ROS/include/Utils.h"              // servo utility class for sleep & time methods
+#include "MR_Gripper_Royale_T42_ROS/RPMSerialInterface.h" // servos
+#include "MR_Gripper_Royale_T42_ROS/Utils.h"              // servo utility class for sleep & time methods
 
 
 

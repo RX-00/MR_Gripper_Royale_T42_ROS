@@ -1,4 +1,4 @@
-#include "/home/gripper/catkin_ws/src/MR_Gripper_Royale_T42_ROS/include/Utils.h"
+#include "MR_Gripper_Royale_T42_ROS/Utils.h"
 
 #include <iostream>
 #include <stdio.h>

@@ -14,8 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(Boost REQUIRED COMPONENTS system)
+find_package(MR_Gripper_Royale_T42_ROS REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -103,9 +103,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES MR_Gripper_Royale_T42_ROS
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 
@@ -116,14 +116,15 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  # include
   ${catkin_INCLUDE_DIRS}
+  ${MR_Gripper_Royale_T42_ROS_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/MR_Gripper_Royale_T42_ROS.cpp
-# )
+#add_library(${PROJECT_NAME}
+  #   src/${PROJECT_NAME}/MR_Gripper_Royale_T42_ROS.cpp
+#)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -134,6 +135,23 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/MR_Gripper_Royale_T42_ROS_node.cpp)
+add_executable(pub src/pub.cpp)
+target_link_libraries(pub ${catkin_LIBRARIES})
+add_dependencies(pub MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
+
+add_executable(sub src/sub.cpp)
+target_link_libraries(sub ${catkin_LIBRARIES})
+add_dependencies(sub MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
+
+add_library(RPMSerialInterface src/RPMSerialInterface.cpp)
+add_library(Utils src/Utils.cpp)
+add_library(RPMSerialInterfacePOSIX src/RPMSerialInterfacePOSIX.cpp)
+add_executable(demo src/demo.cpp)
+target_link_libraries(demo ${catkin_LIBRARIES})
+target_link_libraries(demo RPMSerialInterface)
+target_link_libraries(demo Utils)
+target_link_libraries(demo RPMSerialInterfacePOSIX)
+add_dependencies(demo MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -172,11 +190,11 @@ include_directories(
 # )
 
 ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
+)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
@@ -197,29 +215,3 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-add_executable(pub src/pub.cpp)
-target_link_libraries(pub ${catkin_LIBRARIES})
-add_dependencies(pub MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
-
-add_executable(sub src/sub.cpp)
-target_link_libraries(sub ${catkin_LIBRARIES})
-add_dependencies(sub MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
-
-#add_executable(RPMSerialInterface src/RPMSerialInterface.cpp)
-#target_link_libraries(RPMSerialInterface ${catkin_LIBRARIES})
-#add_dependencies(RPMSerialInterface MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
-
-#add_executable(Utils src/Utils.cpp)
-#target_link_libraries(Utils ${catkin_LIBRARIES})
-#add_dependencies(Utils MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
-
-add_library(RPMSerialInterface src/RPMSerialInterface.cpp)
-add_library(Utils src/Utils.cpp)
-add_library(RPMSerialInterfacePOSIX src/RPMSerialInterfacePOSIX.cpp)
-add_executable(demo src/demo.cpp)
-target_link_libraries(demo ${catkin_LIBRARIES})
-target_link_libraries(demo RPMSerialInterface)
-target_link_libraries(demo Utils)
-target_link_libraries(demo RPMSerialInterfacePOSIX)
-add_dependencies(demo MR_Gripper_Royale_T42_ROS_generate_messages_cpp)

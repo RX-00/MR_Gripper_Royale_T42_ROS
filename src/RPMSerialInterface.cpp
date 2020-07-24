@@ -21,12 +21,12 @@
    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
 */
-#include "/home/gripper/catkin_ws/src/MR_Gripper_Royale_T42_ROS/include/RPMSerialInterface.h"
+#include "MR_Gripper_Royale_T42_ROS/RPMSerialInterface.h"
 
 #ifdef _WIN32
 	#include "RPMSerialInterfaceWindows.h"
 #else
-	#include "/home/gripper/catkin_ws/src/MR_Gripper_Royale_T42_ROS/include/RPMSerialInterfacePOSIX.h"
+#include "MR_Gripper_Royale_T42_ROS/RPMSerialInterfacePOSIX.h"
 #endif
 
 namespace RPM
