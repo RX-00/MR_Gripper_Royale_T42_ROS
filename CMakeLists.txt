@@ -143,6 +143,10 @@ add_executable(sub src/sub.cpp)
 target_link_libraries(sub ${catkin_LIBRARIES})
 add_dependencies(sub MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
 
+add_executable(pub_gripper src/pub_gripper.cpp)
+target_link_libraries(pub_gripper ${catkin_LIBRARIES})
+add_dependencies(pub_gripper MR_Gripper_Royale_T42_ROS_generate_messages_cpp)
+
 add_library(RPMSerialInterface src/RPMSerialInterface.cpp)
 add_library(Utils src/Utils.cpp)
 add_library(RPMSerialInterfacePOSIX src/RPMSerialInterfacePOSIX.cpp)

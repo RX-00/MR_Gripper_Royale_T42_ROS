@@ -10,9 +10,11 @@
 #include <string>
 #include <unistd.h>
 
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+
 #include "MR_Gripper_Royale_T42_ROS/RPMSerialInterface.h" // servos
 #include "MR_Gripper_Royale_T42_ROS/Utils.h"              // servo utility class for sleep & time methods
-
 
 
 // ====================================================================================
@@ -168,7 +170,6 @@ void servo_control(RPM::SerialInterface *servosInterface){
   bool cont = true;
   char option;
   std::cout << "Starting demo for MassRobotics Royale T42 Gripper..." << std::endl;
-
   while (cont){
     std::cout << "\n\nPlease choose an option" << std::endl;
     std::cout << "A: close & open gripper\n"
@@ -200,7 +201,6 @@ void servo_control(RPM::SerialInterface *servosInterface){
       break;
     }
   }
-
   std::cout << "Terminating demo..." << std::endl;
 }
 
@@ -243,20 +243,9 @@ RPM::SerialInterface * serialInterfaceInit(unsigned char deviceNumber, unsigned 
   return serialInterface;
 }
 
-
-int main(int argc, char** argv){
-  // Serial servo interface
-  unsigned char deviceNumber = 12; // NOTE: might need to change to 6
-  unsigned char channelNumber = 1;
-  std::string portName = "/dev/ttyACM0";
-  RPM::SerialInterface *servosInterface = serialInterfaceInit(deviceNumber, channelNumber, portName);
-  servosInterface -> SerialInterface::mMinChannelValue = SRVO_MIN;
-  servosInterface -> SerialInterface::mMaxChannelValue = SRVO_MAX;
-
+void init_srv_test(RPM::SerialInterface *servosInterface){
   sinusoid_signal(servosInterface, 0);
-  //servo_test(servosInterface, 0);
   sinusoid_signal(servosInterface, 1);
-  //servo_test(servosInterface, 1);
 
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
   servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
@@ -268,8 +257,36 @@ int main(int argc, char** argv){
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
   servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
   Utils::sleep(1000);
+}
 
-  //servo_control(servosInterface);
+
+// ROS callback function for listening to topic data
+void sub_callback(const std_msgs::String::ConstPtr& msg){
+  std::string cmd = msg->data.c_str();
+  ROS_INFO("heard: [%s]", cmd);
+}
+
+
+int main(int argc, char** argv){
+  // Serial servo interface
+  unsigned char deviceNumber = 12; // NOTE: might need to change to 6
+  unsigned char channelNumber = 1;
+  std::string portName = "/dev/ttyACM0";
+  RPM::SerialInterface *servosInterface = serialInterfaceInit(deviceNumber, channelNumber, portName);
+  servosInterface -> SerialInterface::mMinChannelValue = SRVO_MIN;
+  servosInterface -> SerialInterface::mMaxChannelValue = SRVO_MAX;
+  init_srv_test(servosInterface);
+
+  // starting up ros node
+  ros::init(argc, argv, "listener");
+  // main acccess point to communicate w/ ROS sys (this NodeHandle will init this node)
+  ros::NodeHandle n;
+  // subscriber call on the do_gripper topic, invokes call to ROS master node
+  ros::Subscriber sub = n.subscribe("do_gripper", 10, sub_callback); // msg queue size: 10
+
+  // ros::spin() will enter a loop calling callbacks, all callbacks will be called from within this main thread
+  // ros::spin() will exit when node is shutdown by the master or Ctr-C is executed
+  ros::spin();
 
   delete servosInterface;
   servosInterface = NULL;
