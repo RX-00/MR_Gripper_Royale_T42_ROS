@@ -27,7 +27,7 @@
 #ifdef _WIN32
 	#include "RPMSerialInterfaceWindows.h"
 #else
-#include "/home/gripper/catkin_ws/src/MR_Gripper_Royale_T42_ROS/include/MR_Gripper_Royale_T42_ROS/RPMSerialInterfacePOSIX.h"
+#include "MR_Gripper_Royale_T42_ROS/RPMSerialInterfacePOSIX.h"
 #endif
 
 namespace RPM
