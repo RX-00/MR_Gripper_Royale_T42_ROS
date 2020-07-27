@@ -3,7 +3,9 @@
        This tag overrides the default definition with
        specific ROS_ROOT and ROS_PACKAGE_PATH values -->
   <!--machine name="local_alt" address="localhost" default="true" ros-root="/u/user/ros/ros/" ros-package-path="/u/user/ros/ros-pkg" /-->
-  <!-- a respawn-able listener node -->
+  
+  <!-- always init pub first before sub -->
+
+<node name="pub_gripper" pkg="MR_Gripper_Royale_T42_ROS" type="pub_gripper" />
   <node name="demo_gripper" pkg="MR_Gripper_Royale_T42_ROS" type="demo" respawn="true" />
-  <node name="pub_gripper" pkg="MR_Gripper_Royale_T42_ROS" type="pub_gripper" />
 </launch>
