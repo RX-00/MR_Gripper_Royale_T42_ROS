@@ -247,9 +247,11 @@ void init_srv_test(RPM::SerialInterface *servosInterface){
   sinusoid_signal(servosInterface, 0);
   sinusoid_signal(servosInterface, 1);
 
+  std::cout << "Opening gripper..." << std::endl;
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
   servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
   Utils::sleep(3000);
+  /*
   std::cout << "Closing gripper..." << std::endl;
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_CLOSE);
   servosInterface -> setTargetCP(R_SERVO, R_SERVO_CLOSE);
@@ -257,6 +259,7 @@ void init_srv_test(RPM::SerialInterface *servosInterface){
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
   servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
   Utils::sleep(1000);
+  */
 }
 
 
