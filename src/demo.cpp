@@ -244,8 +244,8 @@ RPM::SerialInterface * serialInterfaceInit(unsigned char deviceNumber, unsigned 
 }
 
 void init_srv_test(RPM::SerialInterface *servosInterface){
-  sinusoid_signal(servosInterface, 0);
-  sinusoid_signal(servosInterface, 1);
+  //sinusoid_signal(servosInterface, 0);
+  //sinusoid_signal(servosInterface, 1);
 
   std::cout << "Opening gripper..." << std::endl;
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
@@ -281,11 +281,12 @@ int main(int argc, char** argv){
   init_srv_test(servosInterface);
 
   // starting up ros node
+  std::cout << "Setting up ros node..." << std::endl;
   ros::init(argc, argv, "listener");
   // main acccess point to communicate w/ ROS sys (this NodeHandle will init this node)
   ros::NodeHandle n;
   // subscriber call on the do_gripper topic, invokes call to ROS master node
-  ros::Subscriber sub = n.subscribe("do_gripper", 10, sub_callback); // msg queue size: 10
+  ros::Subscriber sub = n.subscribe("do_gripper", 1000, sub_callback); // msg queue size: 1000
 
   // ros::spin() will enter a loop calling callbacks, all callbacks will be called from within this main thread
   // ros::spin() will exit when node is shutdown by the master or Ctr-C is executed
