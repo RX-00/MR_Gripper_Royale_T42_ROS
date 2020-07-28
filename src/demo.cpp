@@ -43,6 +43,47 @@
 #define L_SERVO    0
 #define R_SERVO    1
 
+class Listener{
+public:
+  bool gripper_state; // open (false) and close (true) states
+  unsigned char deviceNumber;
+  unsigned char channelNumber;
+  std::string portName;
+  RPM::SerialInterface *servosInterface;
+
+  Listener();
+  ~Listener();
+
+  // callback function for ros
+  void sub_callback(const std_msgs::String::ConstPtr& msg);
+};
+
+Listener::Listener(){
+  deviceNumber = 12;
+  channelNumber = 1;
+  portName = "/dev/ttyACM0";
+  servosInterface = serialInterfaceInit(deviceNumber, channelNumber, portName);
+  servosInterface -> SerialInterface::mMinChannelValue = SRVO_MIN;
+  servosInterface -> SerialInterface::mMaxChannelValue = SRVO_MAX;
+}
+
+Listener::~Listener(){
+  delete servosInterface;
+  servosInterface = NULL;
+}
+
+void Listener::sub_callback(const std_msgs::String::ConstPtr& msg){
+  const char* cmd = (msg->data.c_str());
+  ROS_INFO("heard: [%s]", cmd);
+  std::string gripper_cmd(cmd);
+  if (!gripper_cmd.compare("open")){
+    gripper_state = false;
+  }
+  if (!gripper_cmd.compare("close")){
+    gripper_state = true;
+  }
+}
+
 // automatic test for one individual servo
 void servo_test(RPM::SerialInterface *servosInterface, unsigned char channelNumber){
   std::cout << "Testing servo number: " << 11 << std::endl;
@@ -59,149 +100,6 @@ void servo_test(RPM::SerialInterface *servosInterface, unsigned char channelNumb
   }
   std::cout << "min position" << std::endl;
   servosInterface -> setTargetCP(channelNumber, SRVO_MIN);
-}
-
-// open or close the gripper
-int close_and_open(RPM::SerialInterface *servosInterface){
-  bool cont = true;
-  char option;
-  while(cont){
-    std::cout << "Close & Open gripper \n"
-              << "A: open gripper \n"
-              << "B: close gripper \n"
-              << "any other input exits this demo option"
-              << std::endl;
-    std::cin >> option;
-    if (!isalpha(option)) exit(0);
-    switch(option){
-    case 'A':
-      std::cout << "opening gripper..." << std::endl;
-      servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
-      servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
-      Utils::sleep(500);
-      break;
-    case 'B':
-      std::cout << "closing gripper..." << std::endl;
-      servosInterface -> setTargetCP(L_SERVO, L_SERVO_CLOSE);
-      servosInterface -> setTargetCP(R_SERVO, R_SERVO_CLOSE);
-      Utils::sleep(500);
-      break;
-    default:
-      cont = false;
-      return 0;
-      break;
-    }
-  }
-  return 0;
-}
-
-// move one individual servo
-int move_servo(RPM::SerialInterface *servosInterface, unsigned char channelNumber){
-  bool cont = true;
-  char option;
-  int val = SRVO_MIN;
-  while(cont){
-    std::cout << "Close & Open gripper \n"
-              << "A: decrease servo pos value \n"
-              << "B: increase servo pos value \n"
-              << "any other input exits this demo option"
-              << std::endl;
-    std::cin >> option;
-    if (!isalpha(option)) exit(0);
-    switch(option){
-    case 'A':
-      val -= 5;
-      servosInterface -> setTargetCP(channelNumber, val);
-      Utils::sleep(500);
-      break;
-    case 'B':
-      val += 5;
-      servosInterface -> setTargetCP(channelNumber, val);
-      Utils::sleep(500);
-      break;
-    default:
-      cont = false;
-      return 0;
-      break;
-    }
-  }
-  return 0;
-}
-
-// moves both servos at the same time
-int move_servos(RPM::SerialInterface *servosInterface){
-  bool cont = true;
-  char option;
-  int val0 = SRVO_MIN;
-  int val1 = SRVO_MAX;
-  while(cont){
-    std::cout << "Close & Open gripper \n"
-              << "A: decrease servos pos value \n"
-              << "B: increase servos pos value \n"
-              << "any other input exits this demo option"
-              << std::endl;
-    std::cin >> option;
-    if (!isalpha(option)) exit(0);
-    switch(option){
-    case 0:
-      val0 -= 5;
-      val1 += 5;
-      servosInterface -> setTargetCP(L_SERVO, val0);
-      servosInterface -> setTargetCP(R_SERVO, val1);
-      Utils::sleep(500);
-      break;
-    case 1:
-      val0 += 5;
-      val1 -= 5;
-      servosInterface -> setTargetCP(L_SERVO, val0);
-      servosInterface -> setTargetCP(R_SERVO, val1);
-      Utils::sleep(500);
-      break;
-    default:
-      return 0;
-      cont = false;
-      break;
-    }
-  }
-  return 0;
-}
-
-void servo_control(RPM::SerialInterface *servosInterface){
-  bool cont = true;
-  char option;
-  std::cout << "Starting demo for MassRobotics Royale T42 Gripper..." << std::endl;
-  while (cont){
-    std::cout << "\n\nPlease choose an option" << std::endl;
-    std::cout << "A: close & open gripper\n"
-              << "B: move servo num 0\n"
-              << "C: move servo num 1\n"
-              << "D: move both servos\n"
-              << "E: exit demo\n"
-              << std::endl;
-    std::cin >> option;
-    if (!isalpha(option)) exit(0);
-    switch(option){
-    case 'A':
-      close_and_open(servosInterface);
-      break;
-    case 'B':
-      move_servo(servosInterface, L_SERVO);
-      break;
-    case 'C':
-      move_servo(servosInterface, R_SERVO);
-      break;
-    case 'D':
-      move_servos(servosInterface);
-      break;
-    case 'E':
-      cont = false;
-      break;
-    default:
-      std::cout << "Invalid input" << std::endl;
-      break;
-    }
-  }
-  std::cout << "Terminating demo..." << std::endl;
 }
 
 // function to test device over serial w/ sinusoidal signals
@@ -263,36 +161,46 @@ void init_srv_test(RPM::SerialInterface *servosInterface){
 }
 
 
-// ROS callback function for listening to topic data
-void sub_callback(const std_msgs::String::ConstPtr& msg){
-  std::string cmd = msg->data.c_str();
-  ROS_INFO("heard: [%s]", cmd);
-}
-
 
 int main(int argc, char** argv){
   // Serial servo interface
+  Listener listener;
+  /*
   unsigned char deviceNumber = 12; // NOTE: might need to change to 6
   unsigned char channelNumber = 1;
   std::string portName = "/dev/ttyACM0";
   RPM::SerialInterface *servosInterface = serialInterfaceInit(deviceNumber, channelNumber, portName);
   servosInterface -> SerialInterface::mMinChannelValue = SRVO_MIN;
   servosInterface -> SerialInterface::mMaxChannelValue = SRVO_MAX;
-  init_srv_test(servosInterface);
+  */
+  //init_srv_test(servosInterface);
 
   // starting up ros node
   std::cout << "Setting up ros node..." << std::endl;
   ros::init(argc, argv, "listener");
   // main acccess point to communicate w/ ROS sys (this NodeHandle will init this node)
   ros::NodeHandle n;
+  
   // subscriber call on the do_gripper topic, invokes call to ROS master node
-  ros::Subscriber sub = n.subscribe("do_gripper", 1000, sub_callback); // msg queue size: 1000
+  ros::Subscriber sub = n.subscribe("do_gripper", 1000, &Listener::sub_callback, &listener); // msg queue size: 1000
 
+  /*
+  if (listener.gripper_state == false){
+    std::cout << "Opening gripper..." << std::endl;
+    servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
+    servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
+    Utils::sleep(500);
+  }
+  if (listener.gripper_state == true){
+    std::cout << "Closing gripper..." << std::endl;
+    servosInterface -> setTargetCP(L_SERVO, L_SERVO_CLOSE);
+    servosInterface -> setTargetCP(R_SERVO, R_SERVO_CLOSE);
+    Utils::sleep(500);
+  }
+  */
+  
   // ros::spin() will enter a loop calling callbacks, all callbacks will be called from within this main thread
-  // ros::spin() will exit when node is shutdown by the master or Ctr-C is executed
   ros::spin();
 
-  delete servosInterface;
-  servosInterface = NULL;
   return 0;
 }
