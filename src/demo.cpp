@@ -54,6 +54,7 @@ public:
   Listener();
   ~Listener();
 
+  void servo_cmd_cllbck();
   // callback function for ros
   void sub_callback(const std_msgs::String::ConstPtr& msg);
 };
@@ -72,15 +73,33 @@ Listener::~Listener(){
   servosInterface = NULL;
 }
 
+void Listener::servo_cmd_cllbck(){
+  if (gripper_state == false){
+    std::cout << "Opening gripper..." << std::endl;
+    servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
+    servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
+    Utils::sleep(500);
+  }
+  if (gripper_state == true){
+    std::cout << "Closing gripper..." << std::endl;
+    servosInterface -> setTargetCP(L_SERVO, L_SERVO_CLOSE);
+    servosInterface -> setTargetCP(R_SERVO, R_SERVO_CLOSE);
+    Utils::sleep(500);
+  }
+  gripper_state = false;
+}
+
 void Listener::sub_callback(const std_msgs::String::ConstPtr& msg){
   const char* cmd = (msg->data.c_str());
   ROS_INFO("heard: [%s]", cmd);
   std::string gripper_cmd(cmd);
   if (!gripper_cmd.compare("open")){
     gripper_state = false;
+    servo_cmd_cllbck();
   }
   if (!gripper_cmd.compare("close")){
     gripper_state = true;
+    servo_cmd_cllbck();
   }
 }
 
@@ -149,7 +168,7 @@ void init_srv_test(RPM::SerialInterface *servosInterface){
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
   servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
   Utils::sleep(3000);
-  
+  /*
   std::cout << "Closing gripper..." << std::endl;
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_CLOSE);
   servosInterface -> setTargetCP(R_SERVO, R_SERVO_CLOSE);
@@ -157,7 +176,7 @@ void init_srv_test(RPM::SerialInterface *servosInterface){
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
   servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
   Utils::sleep(1000);
-  
+  */
 }
 
 
@@ -177,21 +196,6 @@ int main(int argc, char** argv){
   // subscriber call on the do_gripper topic, invokes call to ROS master node
   ros::Subscriber sub = n.subscribe("do_gripper", 1000, &Listener::sub_callback, &listener); // msg queue size: 1000
 
-  /*
-  if (listener.gripper_state == false){
-    std::cout << "Opening gripper..." << std::endl;
-    servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
-    servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
-    Utils::sleep(500);
-  }
-  if (listener.gripper_state == true){
-    std::cout << "Closing gripper..." << std::endl;
-    servosInterface -> setTargetCP(L_SERVO, L_SERVO_CLOSE);
-    servosInterface -> setTargetCP(R_SERVO, R_SERVO_CLOSE);
-    Utils::sleep(500);
-  }
-  */
-  
   // ros::spin() will enter a loop calling callbacks, all callbacks will be called from within this main thread
   ros::spin();
 
