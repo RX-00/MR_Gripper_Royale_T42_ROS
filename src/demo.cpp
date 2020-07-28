@@ -93,11 +93,12 @@ void Listener::sub_callback(const std_msgs::String::ConstPtr& msg){
   const char* cmd = (msg->data.c_str());
   ROS_INFO("heard: [%s]", cmd);
   std::string gripper_cmd(cmd);
-  if (!gripper_cmd.compare("open")){
+  std::cout << "gripper now " << gripper_cmd << std::endl;
+  if (gripper_cmd == "open"){
     gripper_state = false;
     servo_cmd_cllbck();
   }
-  if (!gripper_cmd.compare("close")){
+  if (gripper_cmd == "close"){
     gripper_state = true;
     servo_cmd_cllbck();
   }
