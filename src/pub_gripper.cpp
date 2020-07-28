@@ -3,8 +3,26 @@
 
 #include <sstream>
 
-int main(int argc, char **argv)
-{
+std::string user_input_cmd(){
+  char option;
+  std::cout << " A for open\n B for close\n any other key for terminate program" << std::endl;
+  std::cin >> option;
+  if (!isalpha(option)) return "open";
+  switch(option){
+  case 'A':
+    return "open";
+    break;
+  case 'B':
+    return "close";
+    break;
+  default:
+    std::cout << "Terminating..." << std::endl;
+    exit(0);
+    break;
+  }
+}
+
+int main(int argc, char **argv){
   /**
    * The ros::init() function needs to see argc and argv so that it can perform
    * any ROS arguments and name remapping that were provided at the command line.
@@ -57,8 +75,12 @@ int main(int argc, char **argv)
      */
     std_msgs::String msg;
 
+    std::string cmd = user_input_cmd();
+
+
     std::stringstream ss;
-    ss << "open " << count;
+    //ss << "open " << count;
+    ss << cmd << " " << count;
     msg.data = ss.str();
 
     ROS_INFO("%s", msg.data.c_str());

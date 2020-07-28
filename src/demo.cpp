@@ -62,9 +62,9 @@ Listener::Listener(){
   deviceNumber = 12;
   channelNumber = 1;
   portName = "/dev/ttyACM0";
-  servosInterface = serialInterfaceInit(deviceNumber, channelNumber, portName);
-  servosInterface -> SerialInterface::mMinChannelValue = SRVO_MIN;
-  servosInterface -> SerialInterface::mMaxChannelValue = SRVO_MAX;
+  //servosInterface = RPM::SerialInterface::serialInterfaceInit(deviceNumber, channelNumber, portName);
+  servosInterface -> RPM::SerialInterface::mMinChannelValue = SRVO_MIN;
+  servosInterface -> RPM::SerialInterface::mMaxChannelValue = SRVO_MAX;
 }
 
 Listener::~Listener(){
@@ -149,7 +149,7 @@ void init_srv_test(RPM::SerialInterface *servosInterface){
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
   servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
   Utils::sleep(3000);
-  /*
+  
   std::cout << "Closing gripper..." << std::endl;
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_CLOSE);
   servosInterface -> setTargetCP(R_SERVO, R_SERVO_CLOSE);
@@ -157,7 +157,7 @@ void init_srv_test(RPM::SerialInterface *servosInterface){
   servosInterface -> setTargetCP(L_SERVO, L_SERVO_OPEN);
   servosInterface -> setTargetCP(R_SERVO, R_SERVO_OPEN);
   Utils::sleep(1000);
-  */
+  
 }
 
 
@@ -165,15 +165,8 @@ void init_srv_test(RPM::SerialInterface *servosInterface){
 int main(int argc, char** argv){
   // Serial servo interface
   Listener listener;
-  /*
-  unsigned char deviceNumber = 12; // NOTE: might need to change to 6
-  unsigned char channelNumber = 1;
-  std::string portName = "/dev/ttyACM0";
-  RPM::SerialInterface *servosInterface = serialInterfaceInit(deviceNumber, channelNumber, portName);
-  servosInterface -> SerialInterface::mMinChannelValue = SRVO_MIN;
-  servosInterface -> SerialInterface::mMaxChannelValue = SRVO_MAX;
-  */
-  //init_srv_test(servosInterface);
+  listener.servosInterface = serialInterfaceInit(listener.deviceNumber, listener.channelNumber, listener.portName);
+  init_srv_test(listener.servosInterface);
 
   // starting up ros node
   std::cout << "Setting up ros node..." << std::endl;
